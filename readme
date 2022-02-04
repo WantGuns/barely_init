@@ -1,0 +1,27 @@
+barely init
+===========
+
+This project encloses an initramfs which barely is.
+Its purpose stands to print authoritative messages / flags during the kernel boot.
+
+
+Building
+--------
+
+Just run:
+    
+    make
+
+The init binary and the initramfs would be created in the build folder.
+
+
+Running
+-------
+
+You can use it with qemu:
+
+    qemu-system-x86_64 \
+        -kernel $(KERNEL_DIR)/latest/arch/x86_64/boot/bzImage \
+        -initrd build/initramfs \
+        -nographic -append "console=ttyS0"
+    
