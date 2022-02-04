@@ -1,8 +1,8 @@
-barely init
-===========
+barely init w/ busybox
+======================
 
-This project encloses an initramfs which barely is.
-Its purpose stands to print authoritative messages / flags during the kernel boot.
+This branch is a project cut above barely_init. It features using busybox as
+the initramfs.
 
 
 Building
@@ -12,7 +12,7 @@ Just run:
     
     make
 
-The init binary and the initramfs would be created in the build folder.
+The initramfs would be created in the build folder.
 
 
 Running

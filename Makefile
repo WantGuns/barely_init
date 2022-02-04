@@ -1,17 +1,13 @@
-CC				:=	clang
-CFLAGS			:=	-static
-SRC_DIR			:=	src
-O				:=	build
-INITRAMFS_DIR	:= $(O)/initramfs_dir
+O			:= build
+CHUTE	    := $(O)/chute
+RAMDISKOUT 	:= $(O)/initramfs
+RAMDISKDIR	:= ramdisk
 
-SRC				:=	$(SRC_DIR)/init.c
-OBJ				:=	$(O)/init.o
-
-INIT			:= init
-RAMDISK 		:= initramfs
+INIT		:= $(RAMDISKDIR)/init
+BUSYBOX		:= $(RAMDISKDIR)/sbin/busybox
 
 .PHONY: all
-all: $(O) $(INIT) $(RAMDISK)
+all: $(RAMDISKOUT)
 
 .PHONY: clean
 clean:
@@ -20,17 +16,23 @@ clean:
 $(O):
 	mkdir -p $(O)
 
-$(INITRAMFS_DIR): $(O)
-	mkdir -p $(INITRAMFS_DIR)
+$(CHUTE):
+	mkdir -p $(CHUTE)
 
-$(O)/%.o: $(SRC)
-	$(CC) -c -o $@ $< $(CFLAGS)
+.PHONY: $(INIT)
+$(INIT):
+	chmod +x $(INIT)
 
-$(INIT): $(OBJ)
-	$(CC) -o $(O)/$@ $^ $(CFLAGS)
+.PHONY: $(BUSYBOX)
+$(BUSYBOX):
+	chmod +x $(BUSYBOX)
 
-$(RAMDISK): $(INIT) $(INITRAMFS_DIR)
-	cp -av $(O)/$(INIT) $(INITRAMFS_DIR)/$(INIT)
-	cd $(INITRAMFS_DIR) && \
-	find . | cpio -H newc -o | gzip > ../$(RAMDISK) && \
-	cd ..
+populate: $(O) $(INIT) $(BUSYBOX) $(CHUTE)
+	cp -a $(RAMDISKDIR)/* $(CHUTE)
+	cd $(CHUTE) && \
+		mkdir -p usr/{bin,sbin} bin sbin sys proc dev etc
+
+$(RAMDISKOUT): populate
+	cd $(CHUTE) && \
+		find . | cpio -H newc -o | gzip > ../../$(RAMDISKOUT) && \
+		cd ..
